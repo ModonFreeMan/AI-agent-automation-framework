@@ -1,0 +1,84 @@
+schema_version: 1
+name: requirement_driven_auto_build_pipeline
+description: 根据用户需求文档自动执行构建流程
+requirement_source: ../requirements/current-requirement.md
+entrypoint: 00-build-entry.md
+runbook: agent-runbook.md
+acceptance_checklist: ../validation/acceptance-checklist.md
+output_dirs:
+  workspace: ../workspaces
+  artifacts: ../artifacts
+  logs: ../logs
+stages:
+  - id: S1
+    name: requirement_intake
+    title: 需求读取与完整性检查
+    input:
+      - ../requirements/current-requirement.md
+    output:
+      - logs/S1-requirement-intake.md
+    complete_when:
+      - 用户目标已识别
+      - 期望产物已识别
+      - 验收标准已识别
+  - id: S2
+    name: task_decomposition
+    title: 构建任务拆解
+    input:
+      - logs/S1-requirement-intake.md
+    output:
+      - logs/S2-task-decomposition.md
+    complete_when:
+      - 已拆分实现任务
+      - 已标记风险和阻塞项
+      - 已确定最小构建范围
+  - id: S3
+    name: workspace_prepare
+    title: 工程工作区准备
+    input:
+      - logs/S2-task-decomposition.md
+    output:
+      - workspaces/
+      - logs/S3-workspace-prepare.md
+    complete_when:
+      - 目标工作区已存在
+      - 技术栈和入口已确认
+      - 不会覆盖无关用户文件
+  - id: S4
+    name: implementation_build
+    title: 实现与构建
+    input:
+      - workspaces/
+      - logs/S2-task-decomposition.md
+    output:
+      - workspaces/
+      - logs/S4-implementation-build.md
+    complete_when:
+      - 已完成需求对应实现
+      - 已记录修改文件
+      - 已生成必要配置和文档
+  - id: S5
+    name: verification
+    title: 验证与质量检查
+    input:
+      - workspaces/
+      - ../validation/acceptance-checklist.md
+    output:
+      - logs/S5-verification.md
+    complete_when:
+      - 已运行相关测试或说明无法运行原因
+      - 已检查验收标准
+      - 已记录剩余风险
+  - id: S6
+    name: artifact_packaging
+    title: 产物归档
+    input:
+      - workspaces/
+      - logs/S5-verification.md
+    output:
+      - artifacts/
+      - logs/S6-artifact-packaging.md
+    complete_when:
+      - 构建产物已归档或路径已记录
+      - 使用说明已提供
+      - 最终摘要已完成

@@ -1,0 +1,100 @@
+schema_version: 1
+name: ai-agent-automation-engineering-framework
+language: zh-CN
+entrypoints:
+  human: README.md
+  agent: 00-agent-entry.md
+  machine_locator: agent-locator.yaml
+  routing_protocol: protocols/task-routing.md
+  safety: governance/safety-boundaries.md
+external_workspaces:
+  auto_build_engineering:
+    title: 自动化构建工程
+    root: ../自动化构建工程
+    requirement_source: ../自动化构建工程/requirements/current-requirement.md
+    build_entry: ../自动化构建工程/build-flow/00-build-entry.md
+    build_pipeline: ../自动化构建工程/build-flow/build-pipeline.yaml
+    use_when:
+      - 根据用户需求文档自动构建
+      - 自动生成代码、测试、配置、文档或交付产物
+      - 需要把需求转换为可执行构建流水线
+layers:
+  task_entry:
+    id: 1
+    title: 任务入口层
+    path: layers/01-task-entry.md
+    use_when:
+      - 用户提出新需求
+      - 需要澄清任务边界
+      - 需要把自然语言任务转成工程任务
+  project_knowledge:
+    id: 2
+    title: 项目知识层
+    path: layers/02-project-knowledge.md
+    use_when:
+      - 需要理解项目结构
+      - 需要定位模块或业务概念
+      - 需要维护架构知识
+  dev_environment:
+    id: 3
+    title: 开发环境层
+    path: layers/03-dev-environment.md
+    use_when:
+      - 需要安装依赖
+      - 需要启动本地服务
+      - 需要运行脚本或调试
+  tool_execution:
+    id: 4
+    title: 工具执行层
+    path: layers/04-tool-execution.md
+    use_when:
+      - 需要调用命令行工具
+      - 需要调用浏览器、数据库、API 或外部服务
+      - 需要定义工具权限
+  quality_verification:
+    id: 5
+    title: 质量验证层
+    path: layers/05-quality-verification.md
+    use_when:
+      - 需要运行测试
+      - 需要做静态检查
+      - 需要证明变更没有破坏行为
+  cicd_delivery:
+    id: 6
+    title: CI/CD 交付层
+    path: layers/06-cicd-delivery.md
+    use_when:
+      - 需要构建、发布或部署
+      - 需要理解流水线
+      - 需要处理交付失败
+  runtime_observability:
+    id: 7
+    title: 运行观测层
+    path: layers/07-runtime-observability.md
+    use_when:
+      - 需要排查线上问题
+      - 需要查看日志、指标或追踪
+      - 需要定义告警和回滚依据
+  governance_security:
+    id: 8
+    title: 治理与安全层
+    path: layers/08-governance-security.md
+    use_when:
+      - 需要处理权限、密钥、隐私或合规
+      - 需要限制 Agent 行为
+      - 需要定义审批边界
+task_routes:
+  feature: [task_entry, project_knowledge, dev_environment, quality_verification]
+  auto_build: [task_entry, project_knowledge, dev_environment, tool_execution, quality_verification, governance_security]
+  bugfix: [project_knowledge, dev_environment, quality_verification, runtime_observability]
+  refactor: [project_knowledge, quality_verification, governance_security]
+  test: [quality_verification, dev_environment]
+  deploy: [cicd_delivery, quality_verification, governance_security]
+  incident: [runtime_observability, project_knowledge, governance_security]
+  documentation: [project_knowledge, task_entry]
+  security: [governance_security, tool_execution, quality_verification]
+default_outputs:
+  - task_summary
+  - changed_files
+  - verification_result
+  - residual_risks
